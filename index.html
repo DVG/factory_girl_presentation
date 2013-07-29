@@ -1,285 +1,63 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Testing 101: A Night out with Factory Girl</title>
-    <meta name="description" content="A framework for easily creating beautiful presentations using HTML">
-    <meta name="author" content="Hakim El Hattab">
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="stylesheet" href="css/reveal.min.css">
-    <link rel="stylesheet" href="css/theme/default.css" id="theme">
-    <!-- For syntax highlighting -->
-    <link rel="stylesheet" href="lib/css/railscasts.css">
-    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
-    <script>
-      document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
-    </script>
-    <!--[if lt IE 9]>
-    <script src="lib/js/html5shiv.js"></script>
-    <![endif]-->
-  </head>
+	<head>
+		<meta charset="utf-8">
+		<title>Presentation</title>
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/railscasts.css">
+		<!-- If the query includes 'print-pdf', use the PDF print sheet -->
+		<script>
+			document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+		</script>
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
 
-  <body>
-    <div class="reveal">
-      <!-- Any section element inside of this container is displayed as a slide -->
-      <div class="slides">
-        <section>
-          <h1>Testing 101: A Night out with Factory Girl</h1>
-          <p>
-            <small>Prepared by Bradley Temple</small>
-          </p>
-        </section>
-        <section>
-          <h2>Me</h2>
-          <ul>
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <title></title>
-            </head>
-            <body>
-            </body>
-            </html>
-          </ul>
-        </section>
-        <section>
-          <h2>What's FactoryGirl?</h2>
-          <p>At it's most basic, it makes objects for tests</p>
-        </section>
-        <section>
-          <h2>Basic Factories</h2>
-          <pre><code data-trim class="ruby">
-factory :user do
-  username "Bob"
-  age 30
-end
-          </code></pre>
-          <p>Makes a "snapshot" of object attributes that's reusable in tests</p>
-        </section>
-        <section>
-          <h2>Associations</h2>
-          <pre><code data-trim class="ruby">
-factory :post do
-  title "Hi"
-  body "Hello"
-  user
-end
-          </code></pre>
-          <p>The user factory will be called and a user object will be created</p>
-        </section>
-        <section>
-          <h2>Sequences</h2>
-          <pre><code data-trim class="ruby">
-factory :user do
-  sequence(:username) { |n| "user#{n}" }
-  age 30
-end
-          </code></pre>
-          <p>Automatically incremebts the attribute to take care of uniqueness constraints</p>
-        </section>
-        <section>
-          <h2>Attribute Blocks</h2>
-          <pre><code>
-factory :user do
-  sequence(:username) { |n| “user#{n}” }
-  age 30
-  password “secret”
-  password_confirmation { |u| u.password }
-end
-          </code></pre>
-        </section>
-        <section>
-          <h2>Child Factories</h2>
-          <pre><code data-trim class="ruby">
-factory :user do
-  username "Bob"
-  admin false
-  factory :admin do
-    admin true
-  end
-end
-          </code></pre>
-        </section>
-        <section>
-          <h2>Enough Basics, lets look at awesome stuff</h2>
-        </section>
-        <section>
-          <h2>Staying out of the database</h2>
-          <pre><code data-trim class="ruby">
-build_stubeed(:user)
-          </code></pre>
-          <p>This will create a mock object, and unlike build, will not create real objects for associations. This also enforces walls on unit tests, and will throw an exception if your code attempts to access the database. This should be your go-to for unit testing</p>
-        </section>
-        <section>
-          <h2>Named Associations</h2>
-          <p>Given this Messaage model:</p>
-          <pre><code data-trim class="ruby">
-class Message < ActiveRecord::Base
-  belongs_to :sender, class_name: "User", foreign_key: "sender_id"
-  belongs_to :recipient, class_name: "User", foreign_key: "recipient_id"
-end
-          </code></pre>
-        </section>
-        <section>
-          <h2>Aliases</h2>
-          <pre><code data-trim class="ruby">
-factory :user, aliases: [:sender, :recipient] do
- username “Bob”
- age 30
-end
-factory :message do
- sender
- recipient 
-end
-          </code></pre>
-        </section>
-        <section>
-          <h2>Traits</h2>
-          <pre><code data-trim class="ruby">
-factory :user do
-  username “Bob”
-  age 30
-  trait :voting_age do
-    age 18
-  end
-  trait :drinking_age do
-    age 21
-  end
-end
-          </code></pre>
-        </section>
-        <section>
-          <h2>Using Traits</h2>
-          <p>Method One: Call Diretly</p>
-          <pre><code class="ruby">create(:user, :drinking_age)</code></pre>
-          <p>Method Two: Child Factory</p>
-          <pre><code data-trim class="ruby">
-factory :user do
-  username “Bob”
-  age 30
-  trait :drinking_age do
-    age 21
-  end
-  factory :drinking_buddy, :traits => [:drinking_age]
-end
-create(:drinking_buddy)
-          </code></pre>
-        </section>
-        <section>
-          <h2>Combining Traits</h2>
-          <pre><code data-trim class="ruby">
-factory :user do
-  username “Bob”
-  age 30
-  trait :drinking_age do
-    age 21
-  end
-  trait :admin do
-    admin true
-  end
-  factory :go_home_admin_your_drunk, :traits => [:drinking_age, :admin]
-end
-          </code></pre>
-        </section>
-        <section>
-          <h2>Usage</h2>
-          <pre><code data-trim class="ruby">
-create(:go_home_admin_your_drunk)
-# => &lt;User username: "user_1", admin: true, age:21&gt;
-          </code></pre>
-        </section>
-        <section>
-          <h2>To-Many Relationships</h2>
-          <pre><code data-trim class="ruby">
-# Bad Way
-user = create(:user)
-5.times { create(:post, user:user) }
-          </code></pre>
-        </section>
-        <section>
-          <h2>Ignored Attributes & Callbacks</h2>
-          <pre><code data-trim class="ruby">
-factory :user do
-  sequence(:username) { |n| “user#{n}” }
-  age 30
-  factory :user_with_posts do
-    ignore do
-      post_count 1
-    end
-    after(:create) do |user, factory|
-      create_list :post, 
-      factory.post_count, 
-      user: user
-    end
-  end
-end
-          </code></pre>
-        </section>
-        <section>
-          <h2>Usage</h2>
-          <pre><code data-trim class="ruby">
-create(:user_with_posts, post_count: 1)
-# =&gt; &lt;User username: "user_1", posts: [&lt;Post title: "Hello World"&gt;]&gt;
-          </code></pre>
-        </section>
-        <section>
-          <h2>Plain Old Ruby Objects</h2>
-          <pre><code data-trim class="ruby">
-factory :url, class: String do
-  skip_create
-  protocol "http://"
-  host "www.google.com"
-  port 80
-  trait :secure do
-    protocol "https://"
-  end
-  initialize_with { new("#{protocol}#{host}:#{port}") }
-end
-          </code></pre>
-        </section>
-        <section>
-          <h2>Usage</h2>
-          <pre><code data-trim class="ruby">
-build(:url, :secure, host: "www.twitter.com")
-# =&gt; "https://www.twitter.com:80"
-          </code></pre>
-        </section>
-        <section>
-          <h2>FactoryGirl resources</h2>
-          <ul>
-            <li><a href="https://github.com/thoughtbot/factory_girl/wiki">FactoryGirl Wiki</a></li>
-            <li><a href="https://learn.thoughtbot.com/factory+girl/articles">Thoughtbot Blog</a></li>
-          </ul>
-        </section>
-      </div>
-    </div>
+	<body>
+		<div class="reveal">
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>Presentation</h1>
+					<p>
+						<small>Prepared by Bradley Temple</small>
+					</p>
+				</section>
+			</div>
+		</div>
 
-    <script src="lib/js/head.min.js"></script>
-    <script src="js/reveal.min.js"></script>
-    <script>
-      // Full list of configuration options available here:
-      // https://github.com/hakimel/reveal.js#configuration
-      Reveal.initialize({
-        controls: true,
-        progress: true,
-        history: true,
-        center: true,
-        theme: 'default', // available themes are in /css/theme
-        transition: 'default', // default/cube/page/concave/zoom/linear/fade/none
-        // Optional libraries used to extend on reveal.js
-        dependencies: [
-          { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
-          { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-          { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
-          { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
-          { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
-          // { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
-          // { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
-        ]
-      });
-    </script>
-  </body>
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+		<script>
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+				theme: 'default', // available themes are in /css/theme
+				transition: 'default', // default/cube/page/concave/zoom/linear/fade/none
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+					// { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+		</script>
+	</body>
 </html>
